@@ -1386,6 +1386,35 @@ describe('strong-remoting-rest', function() {
           });
       });
 
+      it('should handle UTF-8 characters properly', function(done) {
+        var method = givenSharedStaticMethod(
+          function bar(cb) {
+            var stringA = 'foo\xC1\xE1\u0102\u03A9asd><=$~!@#$%^&*()-_=+/.,;\'"[]{}?';
+            var stringB = '\uD83D\uDCA9\uD835\uDC00';
+            cb(null, {a: stringA});
+          },
+          {
+            returns: { arg: 'data', type: 'object', root: true,
+            xml: { wrapperElement: false } },
+            http: { path: '/' }
+          }
+        );
+        request(app).get(method.classUrl)
+          .set('Accept', 'application/xml')
+          .set('Content-Type', 'application/json')
+          .send()
+          .expect('Content-Type', /xml/)
+          .expect(200, function(err, res) {
+            expect(res).to.be.utf8;
+            expect(res.text).to.equal(
+            '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
+            '<response>\n  ' +
+              '<a>fooÁáĂΩasd&gt;&lt;=$~!@#$%^&amp;*()-_=+/.,;&apos;&quot;[]{}?</a>\n' +
+            '</response>');
+            done();
+          });
+      });
+
       it('should produce xml from json objects with toXML()', function(done) {
         var method = givenSharedStaticMethod(
           function bar(a, cb) {
