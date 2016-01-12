@@ -1390,7 +1390,6 @@ describe('strong-remoting-rest', function() {
         var method = givenSharedStaticMethod(
           function bar(cb) {
             var stringA = 'foo\xC1\xE1\u0102\u03A9asd><=$~!@#$%^&*()-_=+/.,;\'"[]{}?';
-            var stringB = '\uD83D\uDCA9\uD835\uDC00';
             cb(null, {a: stringA});
           },
           {
